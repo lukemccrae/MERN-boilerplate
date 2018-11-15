@@ -3,7 +3,12 @@ import 'whatwg-fetch';
 import {
   getFromStorage,
   setInStorage
-} from '../../utils/storage'
+} from '../../utils/storage';
+
+import {
+  withRouter
+} from 'react-router-dom';
+
 
 class Home extends Component {
   constructor(props) {
@@ -19,7 +24,9 @@ class Home extends Component {
       signUpFirstName: '',
       signUpLastName: '',
       signUpEmail: '',
-      signUpPassword: ''
+      signUpPassword: '',
+      timerName: 'New Timer',
+      timerLength: 60
     };
 
     this.onTextboxChangeSignUpEmail = this.onTextboxChangeSignUpEmail.bind(this)
@@ -28,9 +35,12 @@ class Home extends Component {
     this.onTextboxChangeSignInPassword = this.onTextboxChangeSignInPassword.bind(this)
     this.onTextboxChangeSignUpFirstName = this.onTextboxChangeSignUpFirstName.bind(this)
     this.onTextboxChangeSignUpLastName = this.onTextboxChangeSignUpLastName.bind(this)
+    this.onTextboxChangeTimerName = this.onTextboxChangeTimerName.bind(this)
+    this.onTextboxChangeTimerLength = this.onTextboxChangeTimerLength.bind(this)
     this.onSignIn = this.onSignIn.bind(this)
     this.onSignUp = this.onSignUp.bind(this)
     this.logout = this.logout.bind(this)
+    this.addTimer = this.addTimer.bind(this)
 
     // this.newCounter = this.newCounter.bind(this);
     // this.incrementCounter = this.incrementCounter.bind(this);
@@ -101,6 +111,18 @@ class Home extends Component {
     })
   }
 
+  onTextboxChangeTimerName(event) {
+    this.setState({
+      timerName: event.target.value,
+    })
+  }
+
+  onTextboxChangeTimerLength(event) {
+    this.setState({
+      timerLength: event.target.value,
+    })
+  }
+
   onSignUp() {
     const {
       signUpFirstName,
@@ -168,7 +190,6 @@ class Home extends Component {
       .then(res => res.json())
       .then(json => {
         if(json.success) {
-          console.log(json.token);
           setInStorage('the_main_app', { token: json.token })
           this.setState({
             signInError: json.message,
@@ -177,6 +198,7 @@ class Home extends Component {
             signInPassword: '',
             token: json.token
           })
+          // this.props.history.push('/dash')
         } else {
           this.setState({
             signInError: json.message,
@@ -201,6 +223,8 @@ class Home extends Component {
               token: '',
               isLoading: false
             })
+            // this.props.history.push('/')
+            // localStorage.clear();
           } else {
             this.setState({
               isLoading: false
@@ -214,49 +238,90 @@ class Home extends Component {
     }
   }
 
+  addTimer() {
+      const {
+        timerName,
+        timerLength
+      } = this.state;
 
-  incrementCounter(index) {
-    const id = this.state.counters[index]._id;
+      const token = JSON.parse(localStorage.the_main_app).token;
+      console.log(token);
 
-    fetch(`/api/counters/${id}/increment`, { method: 'PUT' })
-      .then(res => res.json())
-      .then(json => {
-        this._modifyCounter(index, json);
-      });
+      this.setState({
+        isLoading: true,
+      })
+
+      fetch(`/timer`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: timerName,
+          length: timerLength,
+          token: token
+        })
+      })
+        .then(res => res.json())
+        .then(json => {
+          if(json.success) {
+            this.setState({
+              signUpError: json.message,
+              isLoading: false,
+              timerName: 'New Timer',
+              timerLength: 60
+            })
+          } else {
+            this.setState({
+              timerError: json.message,
+              isLoading: false
+            })
+          }
+        });
   }
 
-  decrementCounter(index) {
-    const id = this.state.counters[index]._id;
-
-    fetch(`/api/counters/${id}/decrement`, { method: 'PUT' })
-      .then(res => res.json())
-      .then(json => {
-        this._modifyCounter(index, json);
-      });
-  }
-
-  deleteCounter(index) {
-    const id = this.state.counters[index]._id;
-
-    fetch(`/api/counters/${id}`, { method: 'DELETE' })
-      .then(_ => {
-        this._modifyCounter(index, null);
-      });
-  }
-
-  _modifyCounter(index, data) {
-    let prevData = this.state.counters;
-
-    if (data) {
-      prevData[index] = data;
-    } else {
-      prevData.splice(index, 1);
-    }
-
-    this.setState({
-      counters: prevData
-    });
-  }
+  // incrementCounter(index) {
+  //   const id = this.state.counters[index]._id;
+  //
+  //   fetch(`/api/counters/${id}/increment`, { method: 'PUT' })
+  //     .then(res => res.json())
+  //     .then(json => {
+  //       this._modifyCounter(index, json);
+  //     });
+  // }
+  //
+  // decrementCounter(index) {
+  //   const id = this.state.counters[index]._id;
+  //
+  //   fetch(`/api/counters/${id}/decrement`, { method: 'PUT' })
+  //     .then(res => res.json())
+  //     .then(json => {
+  //       this._modifyCounter(index, json);
+  //     });
+  // }
+  //
+  // deleteCounter(index) {
+  //   const id = this.state.counters[index]._id;
+  //
+  //   fetch(`/api/counters/${id}`, { method: 'DELETE' })
+  //     .then(_ => {
+  //       this._modifyCounter(index, null);
+  //     });
+  // }
+  //
+  // _modifyCounter(index, data) {
+  //   let prevData = this.state.counters;
+  //
+  //   if (data) {
+  //     prevData[index] = data;
+  //   } else {
+  //     prevData.splice(index, 1);
+  //   }
+  //
+  //   this.setState({
+  //     counters: prevData
+  //   });
+  // }
 
   render() {
     const {
@@ -341,14 +406,34 @@ class Home extends Component {
         </div>
       )
     }
-
     return (
       <div>
-        <p>Account</p>
-        <button onClick={this.logout}>Logout</button>
+        <div>
+          <p>Account</p>
+          <button onClick={this.logout}>Logout</button>
+        </div>
+        <div>
+          <input
+            type="text"
+            placeholder="Timer Name"
+            value={this.state.timerName}
+            onChange={this.onTextboxChangeTimerName}
+          />
+        <br/>
+          <input
+            type="text"
+            placeholder="Minutes"
+            value={this.state.timerLength}
+            onChange={this.onTextboxChangeTimerLength}
+          />
+        <br/>
+          <button onClick={this.addTimer}>Add Timer</button>
+
+        </div>
       </div>
-    );
+    )
   }
+
 }
 
 export default Home;

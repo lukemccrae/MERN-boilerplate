@@ -1,5 +1,6 @@
 const User = require('../../models/User');
 const UserSession = require('../../models/UserSession');
+const Timer = require('../../models/Timer');
 
 module.exports = (app) => {
   //   app.get('/api/counters', (req, res, next) => {
@@ -103,6 +104,7 @@ module.exports = (app) => {
     }, (err, sessions) => {
 
       if (err) {
+        console.log(err);
         return res.send({
           success: false,
           message: 'error: server error'
@@ -123,6 +125,73 @@ module.exports = (app) => {
     })
   })
 
+  app.post('/timer', (req, res, next) => {
+    const {
+      body
+    } = req;
+
+    const {
+      name,
+      length,
+      token
+    } = body;
+
+    var user = 'Not A User';
+
+    if (!name) {
+      res.send({
+        succes: false,
+        message: 'Error: Timer name cannot be blank.'
+      })
+    }
+
+    if (!length) {
+      res.send({
+        succes: false,
+        message: 'Error: Timer length cannot be blank.'
+      })
+    }
+
+    UserSession.find({
+      _id: token,
+      isDeleted: false
+    }, (err, sessions) => {
+
+      const newTimer = new Timer();
+
+      newTimer.name = name;
+      newTimer.length = length;
+      newTimer.user = sessions[0].userId
+      newTimer.save((err, timer) => {
+        if (err) {
+          console.log(err);
+        } else {
+          res.send({
+            success: true,
+            message: 'Timer added'
+          })
+        }
+      })
+
+      // if (err) {
+      //   console.log(err);
+      //   return res.send({
+      //     success: false,
+      //     message: 'error: server error'
+      //   });
+      // }
+      //
+      // if (sessions.length < 1) {
+      //
+      // } else {
+      //   return res.send({
+      //     success: true,
+      //     message: 'good'
+      //   })
+      // }
+    })
+  })
+
   app.post('/api/account/signup', (req, res, next) => {
     console.log(req.body, 'body');
     const {
@@ -138,8 +207,8 @@ module.exports = (app) => {
       email
     } = body;
 
+
     if (!firstName) {
-      console.log(1);
       res.send({
         succes: false,
         message: 'Error: First name cannot be blank.'
@@ -147,7 +216,6 @@ module.exports = (app) => {
     };
 
     if (!lastName) {
-      console.log(2);
       res.send({
         succes: false,
         message: 'Error: Last name cannot be blank.'
@@ -155,7 +223,6 @@ module.exports = (app) => {
     };
 
     if (!password) {
-      console.log(3);
       res.send({
         succes: false,
         message: 'Error: Password cannot be blank.'
@@ -163,7 +230,6 @@ module.exports = (app) => {
     };
 
     if (!email) {
-      console.log(4);
       res.send({
         succes: false,
         message: ' Error: Email cannot be blank.'
@@ -245,10 +311,12 @@ module.exports = (app) => {
         });
       }
 
-        return res.send({
-          success: true,
-          message: 'good'
-        })
+      return res.send({
+        success: true,
+        message: 'good'
+      })
     })
   })
+
+
 }

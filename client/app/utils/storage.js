@@ -15,6 +15,35 @@ export function getFromStorage(key) {
 
 }
 
+export function logout(hey) {
+  console.log('hihihi');
+  this.setState({
+    isLoading: true
+  })
+  const obj = getFromStorage('the_main_app');
+  if(obj && obj.token) {
+    //verify token
+    fetch('/api/account/logout?token=' + obj.token)
+      .then(res => res.json())
+      .then(json => {
+        if(json.success) {
+          this.setState({
+            token: '',
+            isLoading: false
+          })
+        } else {
+          this.setState({
+            isLoading: false
+          })
+        }
+      });
+  } else {
+    this.setState({
+      isLoading: false,
+    })
+  }
+}
+
 export function setInStorage(key, obj) {
   if(!key) {
     console.error('error: key is missing');
