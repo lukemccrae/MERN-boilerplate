@@ -26,7 +26,8 @@ class Home extends Component {
       signUpEmail: '',
       signUpPassword: '',
       timerName: 'New Timer',
-      timerLength: 60
+      timerLength: 60,
+      timers: []
     };
 
     this.onTextboxChangeSignUpEmail = this.onTextboxChangeSignUpEmail.bind(this)
@@ -50,6 +51,9 @@ class Home extends Component {
     // this._modifyCounter = this._modifyCounter.bind(this);
   }
 
+  //give user session to api
+  //with user session, api can find userId and pass timers back to front end
+
   componentDidMount() {
     const obj = getFromStorage('the_main_app');
     if(obj && obj.token) {
@@ -67,8 +71,22 @@ class Home extends Component {
               isLoading: false
             })
           }
-        });
+        })
+        .then(
+          fetch('api/user?token=' + obj.token)
+            .then(res => res.json())
+            .then(json => {
+              if(json.success) {
+                console.log(res);
+                this.setState({
+                  timers: res.data
+                })
+              }
+              console.log(json);
+            })
+        );
     } else {
+      console.log('didnt go');
       this.setState({
         isLoading: false,
       })

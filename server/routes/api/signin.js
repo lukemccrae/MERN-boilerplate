@@ -88,18 +88,22 @@ module.exports = (app) => {
   })
 
   app.get('/api/user', (req, res, next) => {
+    //get the token
+    //verify token that its unique
+    // and that its not deleted
     const {
       query
     } = req;
     const {
-      user
-    } = query
-    console.log(user);
+      token
+    } = query;
 
-    Timer.find({
-        user: user
-      },
-      err, timers) => {
+    console.log('token', token);
+
+    UserSession.find({
+      userId: token,
+      isDeleted: false
+    }, (err, sessions) => {
 
       if (err) {
         console.log(err);
@@ -109,20 +113,39 @@ module.exports = (app) => {
         });
       }
 
-      if (timers.length < 1) {
+      if (sessions.length < 1) {
         return res.send({
           success: false,
           message: 'error: Invalid'
         })
       } else {
-        return res.send({
-          success: true,
-          message: 'good'
-        })
-        console.log(timers);
-      }
-    }
+        Timer.find({
+          user: sessions[0].userId
+        }, (err, timers) => {
 
+          if (err) {
+            console.log(err);
+            return res.send({
+              success: false,
+              message: 'error: server error'
+            });
+          }
+
+          if (timers.length < 1) {
+            return res.send({
+              success: false,
+              message: 'error: Invalid'
+            })
+          } else {
+            return res.send({
+              success: true,
+              message: 'good',
+              data: timers
+            })
+          }
+        })
+      }
+    })
   })
 
   app.get('/api/account/verify', (req, res, next) => {
