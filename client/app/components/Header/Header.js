@@ -6,13 +6,7 @@ import logou from '../../utils/storage';
 
 const Header = () => (
   <header>
-    <Link to="/">Home</Link>
-
-    <nav>
-      <Link to="/helloworld">Hello World</Link>
-    </nav>
-
-    <hr />
+    
   </header>
 );
 

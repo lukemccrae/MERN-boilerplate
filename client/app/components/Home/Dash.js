@@ -19,6 +19,7 @@ class Dash extends Component {
   }
 
   logout() {
+    console.log('hi');
     this.setState({
       isLoading: true
     })

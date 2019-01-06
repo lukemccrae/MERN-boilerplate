@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Button } from 'reactstrap';
 import 'whatwg-fetch';
 import {
   getFromStorage,
@@ -8,7 +9,6 @@ import {
 import {
   withRouter
 } from 'react-router-dom';
-
 
 class Home extends Component {
   constructor(props) {
@@ -245,7 +245,6 @@ class Home extends Component {
       } = this.state;
 
       const token = JSON.parse(localStorage.the_main_app).token;
-      console.log(token);
 
       this.setState({
         isLoading: true,
@@ -279,49 +278,6 @@ class Home extends Component {
           }
         });
   }
-
-  // incrementCounter(index) {
-  //   const id = this.state.counters[index]._id;
-  //
-  //   fetch(`/api/counters/${id}/increment`, { method: 'PUT' })
-  //     .then(res => res.json())
-  //     .then(json => {
-  //       this._modifyCounter(index, json);
-  //     });
-  // }
-  //
-  // decrementCounter(index) {
-  //   const id = this.state.counters[index]._id;
-  //
-  //   fetch(`/api/counters/${id}/decrement`, { method: 'PUT' })
-  //     .then(res => res.json())
-  //     .then(json => {
-  //       this._modifyCounter(index, json);
-  //     });
-  // }
-  //
-  // deleteCounter(index) {
-  //   const id = this.state.counters[index]._id;
-  //
-  //   fetch(`/api/counters/${id}`, { method: 'DELETE' })
-  //     .then(_ => {
-  //       this._modifyCounter(index, null);
-  //     });
-  // }
-  //
-  // _modifyCounter(index, data) {
-  //   let prevData = this.state.counters;
-  //
-  //   if (data) {
-  //     prevData[index] = data;
-  //   } else {
-  //     prevData.splice(index, 1);
-  //   }
-  //
-  //   this.setState({
-  //     counters: prevData
-  //   });
-  // }
 
   render() {
     const {
@@ -366,7 +322,7 @@ class Home extends Component {
                 onChange={this.onTextboxChangeSignInPassword}
               />
             <br/>
-            <button onClick={this.onSignIn}>Sign In</button>
+            <Button color="danger" onClick={this.onSignIn}>Sign In</Button>
               <br/>
           </div>
           <div>
