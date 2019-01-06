@@ -87,6 +87,44 @@ module.exports = (app) => {
     })
   })
 
+  app.get('/api/user', (req, res, next) => {
+    const {
+      query
+    } = req;
+    const {
+      user
+    } = query
+    console.log(user);
+
+    Timer.find({
+        user: user
+      },
+      err, timers) => {
+
+      if (err) {
+        console.log(err);
+        return res.send({
+          success: false,
+          message: 'error: server error'
+        });
+      }
+
+      if (timers.length < 1) {
+        return res.send({
+          success: false,
+          message: 'error: Invalid'
+        })
+      } else {
+        return res.send({
+          success: true,
+          message: 'good'
+        })
+        console.log(timers);
+      }
+    }
+
+  })
+
   app.get('/api/account/verify', (req, res, next) => {
     //get the token
     //verify token that its unique
@@ -99,7 +137,7 @@ module.exports = (app) => {
     } = query;
 
     UserSession.find({
-      _id: token,
+      userId: token,
       isDeleted: false
     }, (err, sessions) => {
 
