@@ -27,7 +27,7 @@ class Home extends Component {
       signUpPassword: '',
       timerName: 'New Timer',
       timerLength: 60,
-      f: []
+      timers: []
     };
 
     this.onTextboxChangeSignUpEmail = this.onTextboxChangeSignUpEmail.bind(this)
@@ -211,9 +211,10 @@ class Home extends Component {
             isLoading: false,
             signInEmail: '',
             signInPassword: '',
-            token: json.token
+            token: json.token,
+            timers: json.timers
           })
-          // this.props.history.push('/dash')
+          console.log(this.state.timers);
         } else {
           this.setState({
             signInError: json.message,
@@ -402,7 +403,15 @@ class Home extends Component {
           <button onClick={this.addTimer}>Add Timer</button>
 
         </div>
+        <div>
+          <div>
+            {this.state.timers.map(i => {
+              return <p key={i._id}>{i.name}</p>
+            })}
+          </div>
+        </div>
       </div>
+
     )
   }
 
