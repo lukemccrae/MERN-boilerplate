@@ -276,6 +276,56 @@ module.exports = (app) => {
     })
   })
 
+  app.delete('/timer', function(req, res) {
+      const {
+        query
+      } = req;
+      const {
+        timerId,
+        token
+      } = query;
+
+      UserSession.find({
+          _id: token,
+          isDeleted: false
+        }, (err, sessions) => {
+          console.log(sessions);
+
+          if (err) {
+            console.log(err);
+            return res.send({
+              success: false,
+              message: 'error: server error'
+            });
+          }
+
+          if (sessions.length < 1) {
+            return res.send({
+              success: false,
+              message: 'error: Invalid'
+            })
+          } else {
+            Timer.deleteOne({
+              _id: timerId
+            }, function(err) {
+              if (err) {
+                console.log(err);
+              } else {
+                Timer.find({
+                  user: sessions[0].userId
+                }, (err, timers) => {
+                  res.send({
+                    success: true,
+                    message: 'Timer deleted',
+                    timers: timers
+                  })
+                })
+              }
+            })
+          }
+      })
+  })
+
   app.get('/api/account/logout', (req, res, next) => {
 
     //get the token

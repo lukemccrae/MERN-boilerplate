@@ -42,6 +42,7 @@ class Home extends Component {
     this.onSignUp = this.onSignUp.bind(this)
     this.logout = this.logout.bind(this)
     this.addTimer = this.addTimer.bind(this)
+    this.deleteTimer = this.deleteTimer.bind(this)
 
     // this.newCounter = this.newCounter.bind(this);
     // this.incrementCounter = this.incrementCounter.bind(this);
@@ -214,7 +215,6 @@ class Home extends Component {
             token: json.token,
             timers: json.timers
           })
-          console.log(this.state.timers);
         } else {
           this.setState({
             signInError: json.message,
@@ -294,6 +294,29 @@ class Home extends Component {
             })
           }
         });
+  }
+
+  deleteTimer(id) {
+    const obj = getFromStorage('the_main_app');
+    fetch(`/timer?timerId=${id}&token=${obj.token}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(res => res.json())
+    .then(json => {
+      if(json.success) {
+        this.setState({
+          timers: json.timers
+        })
+      } else {
+        this.setState({
+          timerError: json.message,
+          isLoading: false
+        })
+      }
+    });
   }
 
   render() {
@@ -406,7 +429,11 @@ class Home extends Component {
         <div>
           <div>
             {this.state.timers.map(i => {
-              return <p key={i._id}>{i.name}</p>
+              return (
+                <p key={i._id}>{i.name}, {i.length} Secs
+                  <button onClick={() => {this.deleteTimer(i._id)}}> Delete</button>
+                </p>
+              )
             })}
           </div>
         </div>
