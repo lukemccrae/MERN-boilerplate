@@ -27,7 +27,7 @@ class Home extends Component {
       signUpPassword: '',
       timerName: 'New Timer',
       timerLength: 60,
-      timers: []
+      f: []
     };
 
     this.onTextboxChangeSignUpEmail = this.onTextboxChangeSignUpEmail.bind(this)
@@ -77,16 +77,13 @@ class Home extends Component {
             .then(res => res.json())
             .then(json => {
               if(json.success) {
-                console.log(res);
                 this.setState({
                   timers: res.data
                 })
               }
-              console.log(json);
             })
         );
     } else {
-      console.log('didnt go');
       this.setState({
         isLoading: false,
       })
@@ -286,7 +283,8 @@ class Home extends Component {
               signUpError: json.message,
               isLoading: false,
               timerName: 'New Timer',
-              timerLength: 60
+              timerLength: 60,
+              timers: json.timers
             })
           } else {
             this.setState({

@@ -78,73 +78,19 @@ module.exports = (app) => {
           });
         }
 
-        return res.send({
-          success: true,
-          message: 'valid signin',
-          token: doc._id
-        })
-      })
-    })
-  })
-
-  app.get('/api/user', (req, res, next) => {
-    //get the token
-    //verify token that its unique
-    // and that its not deleted
-    const {
-      query
-    } = req;
-    const {
-      token
-    } = query;
-
-    console.log('token', token);
-
-    UserSession.find({
-      userId: token,
-      isDeleted: false
-    }, (err, sessions) => {
-
-      if (err) {
-        console.log(err);
-        return res.send({
-          success: false,
-          message: 'error: server error'
-        });
-      }
-
-      if (sessions.length < 1) {
-        return res.send({
-          success: false,
-          message: 'error: Invalid'
-        })
-      } else {
         Timer.find({
-          user: sessions[0].userId
+          user: user._id
         }, (err, timers) => {
-
-          if (err) {
-            console.log(err);
-            return res.send({
-              success: false,
-              message: 'error: server error'
-            });
-          }
-
-          if (timers.length < 1) {
-            return res.send({
-              success: false,
-              message: 'error: Invalid'
-            })
-          } else {
-            return res.send({
-              success: true,
-              message: 'good',
-              data: timers
-            })
-          }
+          return res.send({
+            success: true,
+            message: 'valid signin',
+            token: doc._id,
+            timers: timers
+          })
         })
-      }
+
+
+      })
     })
   })
 
@@ -227,34 +173,22 @@ module.exports = (app) => {
         if (err) {
           console.log(err);
         } else {
-          res.send({
-            success: true,
-            message: 'Timer added'
+          Timer.find({
+            user: sessions[0].userId
+          }, (err, timers) => {
+            res.send({
+              success: true,
+              message: 'Timer added',
+              timers: timers
+            })
           })
+
         }
       })
-
-      // if (err) {
-      //   console.log(err);
-      //   return res.send({
-      //     success: false,
-      //     message: 'error: server error'
-      //   });
-      // }
-      //
-      // if (sessions.length < 1) {
-      //
-      // } else {
-      //   return res.send({
-      //     success: true,
-      //     message: 'good'
-      //   })
-      // }
     })
   })
 
   app.post('/api/account/signup', (req, res, next) => {
-    console.log(req.body, 'body');
     const {
       body
     } = req;
@@ -306,7 +240,6 @@ module.exports = (app) => {
     User.find({
       email: email
     }, (err, previousUsers) => {
-      console.log(previousUsers);
       if (err) {
         res.send({
           success: false,
