@@ -85,7 +85,8 @@ module.exports = (app) => {
             success: true,
             message: 'valid signin',
             token: doc._id,
-            timers: timers
+            timers: timers,
+            user: email
           })
         })
 

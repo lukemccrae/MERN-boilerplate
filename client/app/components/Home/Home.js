@@ -27,7 +27,10 @@ class Home extends Component {
       signUpPassword: '',
       timerName: 'New Timer',
       timerLength: 60,
-      timers: []
+      timers: [],
+      timerQueue: [],
+      username: '',
+      countdown: ''
     };
 
     this.onTextboxChangeSignUpEmail = this.onTextboxChangeSignUpEmail.bind(this)
@@ -43,6 +46,10 @@ class Home extends Component {
     this.logout = this.logout.bind(this)
     this.addTimer = this.addTimer.bind(this)
     this.deleteTimer = this.deleteTimer.bind(this)
+    this.editTimer = this.editTimer.bind(this)
+    this.queueTimer = this.queueTimer.bind(this)
+    this.removeTimer = this.removeTimer.bind(this)
+    this.startTimers = this.startTimers.bind(this)
 
     // this.newCounter = this.newCounter.bind(this);
     // this.incrementCounter = this.incrementCounter.bind(this);
@@ -184,6 +191,18 @@ class Home extends Component {
       });
   }
 
+  startTimers() {
+    var length = 0;
+    for (var i = 0; i < this.state.timerQueue.length; i++) {
+      length += this.state.timerQueue[i].length;
+      setTimeout(function(){
+        this.setState(countDown)
+      }, this.state);
+
+    }
+    console.log("These timers have a collective length of " + length + " seconds.");
+  }
+
   onSignIn() {
     const {
       signInEmail,
@@ -213,7 +232,8 @@ class Home extends Component {
             signInEmail: '',
             signInPassword: '',
             token: json.token,
-            timers: json.timers
+            timers: json.timers,
+            username: json.user
           })
         } else {
           this.setState({
@@ -296,27 +316,54 @@ class Home extends Component {
         });
   }
 
-  deleteTimer(id) {
-    const obj = getFromStorage('the_main_app');
-    fetch(`/timer?timerId=${id}&token=${obj.token}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    .then(res => res.json())
-    .then(json => {
-      if(json.success) {
-        this.setState({
-          timers: json.timers
-        })
-      } else {
-        this.setState({
-          timerError: json.message,
-          isLoading: false
-        })
-      }
-    });
+  deleteTimer(timer) {
+    var pos = this.state.timerQueue.map(function(e) { return e._id; }).indexOf(timer._id);
+    if(pos == -1) {
+      const obj = getFromStorage('the_main_app');
+      fetch(`/timer?timerId=${timer._id}&token=${obj.token}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(res => res.json())
+      .then(json => {
+        if(json.success) {
+          this.setState({
+            timers: json.timers
+          })
+        } else {
+          this.setState({
+            timerError: json.message,
+            isLoading: false
+          })
+        }
+      });
+    }
+  }
+
+  removeTimer(timer) {
+    var queuedTimers = this.state.timerQueue;
+    var timerPos = queuedTimers.indexOf(timer)
+    if(timerPos > -1) {
+      queuedTimers.splice(timerPos, 1)
+    }
+
+    this.setState({timerQueue: queuedTimers})
+  }
+
+  editTimer(id) {
+    console.log("when this button is clicked, the name field becomes a text box and the edit button turns into a save");
+  }
+
+  queueTimer(timer) {
+    if(this.state.timerQueue.indexOf(timer) == -1) {
+      var queuedTimers = this.state.timerQueue;
+      queuedTimers.push(timer);
+      this.setState({timerQueue: queuedTimers});
+    } else {
+      console.log('timer already in queue');
+    }
   }
 
   render() {
@@ -405,7 +452,7 @@ class Home extends Component {
     return (
       <div>
         <div>
-          <p>Account</p>
+          <p>Welcome, {this.state.username}</p>
           <button onClick={this.logout}>Logout</button>
         </div>
         <div>
@@ -428,15 +475,33 @@ class Home extends Component {
         </div>
         <div>
           <div>
+            <p>All Timers</p>
             {this.state.timers.map(i => {
               return (
                 <p key={i._id}>{i.name}, {i.length} Secs
-                  <button onClick={() => {this.deleteTimer(i._id)}}> Delete</button>
+                  <button onClick={() => {this.editTimer(i)}}>Edit</button>
+                  <button onClick={() => {this.queueTimer(i)}}>Add</button>
+                  <button onClick={() => {this.deleteTimer(i)}}>Delete</button>
                 </p>
               )
             })}
           </div>
+          <div>
+            <p>Timer Queue</p>
+              {this.state.timerQueue.map(i => {
+                return (
+                  <p key={i._id}>{i.name}, {i.length} Secs
+                    <button onClick={() => {}}>Move Up</button>
+                    <button onClick={() => {}}>Move Down</button>
+                    <button onClick={() => {this.removeTimer(i)}}>Remove</button>
+                  </p>
+                )
+              })}
+          </div>
         </div>
+        <button onClick={this.startTimers}>Start</button>
+        <h3>this.state.countdown.timer.name</h3>
+        <h3>this.state.countdown.time.time</h3>
       </div>
 
     )
