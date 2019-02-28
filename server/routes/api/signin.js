@@ -133,10 +133,13 @@ module.exports = (app) => {
     })
   })
 
+
+
   app.post('/timer', (req, res, next) => {
     const {
       body
     } = req;
+    console.log(body);
 
     const {
       name,
@@ -146,45 +149,63 @@ module.exports = (app) => {
 
     var user = 'Not A User';
 
-    if (!name) {
+    if (!name || !length) {
       res.send({
         succes: false,
-        message: 'Error: Timer name cannot be blank.'
+        message: 'Error: Timer name and length are required.'
       })
-    }
+    } else {
+      UserSession.find({
+        _id: token,
+        isDeleted: false
+      }, (err, sessions) => {
 
-    if (!length) {
-      res.send({
-        succes: false,
-        message: 'Error: Timer length cannot be blank.'
+        const newTimer = new Timer();
+
+        newTimer.name = name;
+        newTimer.length = length;
+        newTimer.user = sessions[0].userId
+        newTimer.save((err, timer) => {
+          if (err) {
+            console.log(err);
+          } else {
+            Timer.find({
+              user: sessions[0].userId
+            }, (err, timers) => {
+              res.send({
+                success: true,
+                message: 'Timer added',
+                timers: timers
+              })
+            })
+
+          }
+        })
       })
     }
+  })
+
+  app.get('/timer', (req, res, next) => {
+
+    const {
+      query
+    } = req;
+    const {
+      token
+    } = query;
 
     UserSession.find({
       _id: token,
       isDeleted: false
     }, (err, sessions) => {
-
-      const newTimer = new Timer();
-
-      newTimer.name = name;
-      newTimer.length = length;
-      newTimer.user = sessions[0].userId
-      newTimer.save((err, timer) => {
-        if (err) {
-          console.log(err);
-        } else {
-          Timer.find({
-            user: sessions[0].userId
-          }, (err, timers) => {
-            res.send({
-              success: true,
-              message: 'Timer added',
-              timers: timers
-            })
-          })
-
-        }
+      Timer.find({
+        user: sessions[0].userId
+      }, (err, timers) => {
+        res.send({
+          success: true,
+          message: 'Timer added',
+          timers: timers
+        })
       })
     })
   })
@@ -278,53 +299,53 @@ module.exports = (app) => {
   })
 
   app.delete('/timer', function(req, res) {
-      const {
-        query
-      } = req;
-      const {
-        timerId,
-        token
-      } = query;
+    const {
+      query
+    } = req;
+    const {
+      timerId,
+      token
+    } = query;
 
-      UserSession.find({
-          _id: token,
-          isDeleted: false
-        }, (err, sessions) => {
-          console.log(sessions);
+    UserSession.find({
+      _id: token,
+      isDeleted: false
+    }, (err, sessions) => {
+      console.log(sessions);
 
+      if (err) {
+        console.log(err);
+        return res.send({
+          success: false,
+          message: 'error: server error'
+        });
+      }
+
+      if (sessions.length < 1) {
+        return res.send({
+          success: false,
+          message: 'error: Invalid'
+        })
+      } else {
+        Timer.deleteOne({
+          _id: timerId
+        }, function(err) {
           if (err) {
             console.log(err);
-            return res.send({
-              success: false,
-              message: 'error: server error'
-            });
-          }
-
-          if (sessions.length < 1) {
-            return res.send({
-              success: false,
-              message: 'error: Invalid'
-            })
           } else {
-            Timer.deleteOne({
-              _id: timerId
-            }, function(err) {
-              if (err) {
-                console.log(err);
-              } else {
-                Timer.find({
-                  user: sessions[0].userId
-                }, (err, timers) => {
-                  res.send({
-                    success: true,
-                    message: 'Timer deleted',
-                    timers: timers
-                  })
-                })
-              }
+            Timer.find({
+              user: sessions[0].userId
+            }, (err, timers) => {
+              res.send({
+                success: true,
+                message: 'Timer deleted',
+                timers: timers
+              })
             })
           }
-      })
+        })
+      }
+    })
   })
 
   app.get('/api/account/logout', (req, res, next) => {

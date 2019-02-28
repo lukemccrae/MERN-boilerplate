@@ -9,6 +9,7 @@ import {
 import {
   withRouter
 } from 'react-router-dom';
+import AddTimer from '../input/AddTimer.js';
 
 class Home extends Component {
   constructor(props) {
@@ -25,8 +26,6 @@ class Home extends Component {
       signUpLastName: '',
       signUpEmail: '',
       signUpPassword: '',
-      timerName: 'New Timer',
-      timerLength: 60,
       timers: [],
       timerQueue: [],
       username: '',
@@ -39,14 +38,12 @@ class Home extends Component {
     this.onTextboxChangeSignInPassword = this.onTextboxChangeSignInPassword.bind(this)
     this.onTextboxChangeSignUpFirstName = this.onTextboxChangeSignUpFirstName.bind(this)
     this.onTextboxChangeSignUpLastName = this.onTextboxChangeSignUpLastName.bind(this)
-    this.onTextboxChangeTimerName = this.onTextboxChangeTimerName.bind(this)
-    this.onTextboxChangeTimerLength = this.onTextboxChangeTimerLength.bind(this)
     this.onSignIn = this.onSignIn.bind(this)
     this.onSignUp = this.onSignUp.bind(this)
     this.logout = this.logout.bind(this)
-    this.addTimer = this.addTimer.bind(this)
     this.deleteTimer = this.deleteTimer.bind(this)
     this.editTimer = this.editTimer.bind(this)
+    this.getTimers = this.getTimers.bind(this)
     this.queueTimer = this.queueTimer.bind(this)
     this.removeTimer = this.removeTimer.bind(this)
     this.startTimers = this.startTimers.bind(this)
@@ -131,18 +128,6 @@ class Home extends Component {
   onTextboxChangeSignUpLastName(event) {
     this.setState({
       signUpLastName: event.target.value,
-    })
-  }
-
-  onTextboxChangeTimerName(event) {
-    this.setState({
-      timerName: event.target.value,
-    })
-  }
-
-  onTextboxChangeTimerLength(event) {
-    this.setState({
-      timerLength: event.target.value,
     })
   }
 
@@ -274,46 +259,26 @@ class Home extends Component {
     }
   }
 
-  addTimer() {
-      const {
-        timerName,
-        timerLength
-      } = this.state;
-
-      const token = JSON.parse(localStorage.the_main_app).token;
-
-      this.setState({
-        isLoading: true,
-      })
-
-      fetch(`/timer`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          name: timerName,
-          length: timerLength,
-          token: token
+  getTimers(token) {
+    fetch(`/timer?token=${token}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(res => res.json())
+    .then(json => {
+      if(json.success) {
+        this.setState({
+          timers: json.timers
         })
-      })
-        .then(res => res.json())
-        .then(json => {
-          if(json.success) {
-            this.setState({
-              signUpError: json.message,
-              isLoading: false,
-              timerName: 'New Timer',
-              timerLength: 60,
-              timers: json.timers
-            })
-          } else {
-            this.setState({
-              timerError: json.message,
-              isLoading: false
-            })
-          }
-        });
+      } else {
+        this.setState({
+          timerError: json.message,
+          isLoading: false
+        })
+      }
+    });
   }
 
   deleteTimer(timer) {
@@ -455,24 +420,7 @@ class Home extends Component {
           <p>Welcome, {this.state.username}</p>
           <button onClick={this.logout}>Logout</button>
         </div>
-        <div>
-          <input
-            type="text"
-            placeholder="Timer Name"
-            value={this.state.timerName}
-            onChange={this.onTextboxChangeTimerName}
-          />
-        <br/>
-          <input
-            type="text"
-            placeholder="Minutes"
-            value={this.state.timerLength}
-            onChange={this.onTextboxChangeTimerLength}
-          />
-        <br/>
-          <button onClick={this.addTimer}>Add Timer</button>
-
-        </div>
+        <AddTimer getTimers={this.getTimers}></AddTimer>
         <div>
           <div>
             <p>All Timers</p>
