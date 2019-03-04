@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button } from 'reactstrap';
+import { Button, Container, Row } from 'reactstrap';
 import 'whatwg-fetch';
 import {
   getFromStorage,
@@ -10,6 +10,8 @@ import {
   withRouter
 } from 'react-router-dom';
 import AddTimer from '../input/AddTimer.js';
+import TimerList from '../Timers/TimerList.js';
+import TimerQueue from '../Timers/TimerQueue.js';
 
 class Home extends Component {
   constructor(props) {
@@ -27,7 +29,6 @@ class Home extends Component {
       signUpEmail: '',
       signUpPassword: '',
       timers: [],
-      timerQueue: [],
       username: '',
       countdown: ''
     };
@@ -41,10 +42,8 @@ class Home extends Component {
     this.onSignIn = this.onSignIn.bind(this)
     this.onSignUp = this.onSignUp.bind(this)
     this.logout = this.logout.bind(this)
-    this.deleteTimer = this.deleteTimer.bind(this)
     this.editTimer = this.editTimer.bind(this)
     this.getTimers = this.getTimers.bind(this)
-    this.queueTimer = this.queueTimer.bind(this)
     this.removeTimer = this.removeTimer.bind(this)
     this.startTimers = this.startTimers.bind(this)
 
@@ -269,6 +268,7 @@ class Home extends Component {
     .then(res => res.json())
     .then(json => {
       if(json.success) {
+        console.log('did it');
         this.setState({
           timers: json.timers
         })
@@ -281,31 +281,6 @@ class Home extends Component {
     });
   }
 
-  deleteTimer(timer) {
-    var pos = this.state.timerQueue.map(function(e) { return e._id; }).indexOf(timer._id);
-    if(pos == -1) {
-      const obj = getFromStorage('the_main_app');
-      fetch(`/timer?timerId=${timer._id}&token=${obj.token}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-      .then(res => res.json())
-      .then(json => {
-        if(json.success) {
-          this.setState({
-            timers: json.timers
-          })
-        } else {
-          this.setState({
-            timerError: json.message,
-            isLoading: false
-          })
-        }
-      });
-    }
-  }
 
   removeTimer(timer) {
     var queuedTimers = this.state.timerQueue;
@@ -321,15 +296,7 @@ class Home extends Component {
     console.log("when this button is clicked, the name field becomes a text box and the edit button turns into a save");
   }
 
-  queueTimer(timer) {
-    if(this.state.timerQueue.indexOf(timer) == -1) {
-      var queuedTimers = this.state.timerQueue;
-      queuedTimers.push(timer);
-      this.setState({timerQueue: queuedTimers});
-    } else {
-      console.log('timer already in queue');
-    }
-  }
+
 
   render() {
     const {
@@ -377,7 +344,7 @@ class Home extends Component {
             <Button color="danger" onClick={this.onSignIn}>Sign In</Button>
               <br/>
           </div>
-          <div>
+          <div className="container">
               <p>sign up</p>
               <input
                 type="text"
@@ -415,42 +382,27 @@ class Home extends Component {
       )
     }
     return (
-      <div>
-        <div>
-          <p>Welcome, {this.state.username}</p>
-          <button onClick={this.logout}>Logout</button>
-        </div>
-        <AddTimer getTimers={this.getTimers}></AddTimer>
-        <div>
-          <div>
-            <p>All Timers</p>
-            {this.state.timers.map(i => {
-              return (
-                <p key={i._id}>{i.name}, {i.length} Secs
-                  <button onClick={() => {this.editTimer(i)}}>Edit</button>
-                  <button onClick={() => {this.queueTimer(i)}}>Add</button>
-                  <button onClick={() => {this.deleteTimer(i)}}>Delete</button>
-                </p>
-              )
-            })}
+      <Container>
+        <Row>
+          <div className="navbar">
+            <p>Welcome, {this.state.username}</p>
+            <Button onClick={this.logout}>Logout</Button>
           </div>
+          <AddTimer getTimers={this.getTimers}></AddTimer>
           <div>
-            <p>Timer Queue</p>
-              {this.state.timerQueue.map(i => {
-                return (
-                  <p key={i._id}>{i.name}, {i.length} Secs
-                    <button onClick={() => {}}>Move Up</button>
-                    <button onClick={() => {}}>Move Down</button>
-                    <button onClick={() => {this.removeTimer(i)}}>Remove</button>
-                  </p>
-                )
-              })}
+            <div>
+              <p>All Timers</p>
+              <TimerList getTimers={this.getTimers} timers={this.state.timers}></TimerList>
+            </div>
+            <div>
+
+            </div>
           </div>
-        </div>
-        <button onClick={this.startTimers}>Start</button>
-        <h3>this.state.countdown.timer.name</h3>
-        <h3>this.state.countdown.time.time</h3>
-      </div>
+          <button onClick={this.startTimers}>Start</button>
+          <h3>this.state.countdown.timer.name</h3>
+          <h3>this.state.countdown.time.time</h3>
+        </Row>
+      </Container>
 
     )
   }

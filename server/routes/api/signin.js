@@ -1,6 +1,7 @@
 const User = require('../../models/User');
 const UserSession = require('../../models/UserSession');
 const Timer = require('../../models/Timer');
+const Group = require('../../models/Group');
 
 module.exports = (app) => {
   //   app.get('/api/counters', (req, res, next) => {
