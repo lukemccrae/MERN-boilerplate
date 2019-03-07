@@ -82,16 +82,19 @@ module.exports = (app) => {
         Timer.find({
           user: user._id
         }, (err, timers) => {
-          return res.send({
-            success: true,
-            message: 'valid signin',
-            token: doc._id,
-            timers: timers,
-            user: email
+          Group.find({
+            user: user._id
+          }, (err, groups) => {
+            res.send({
+                success: true,
+                message: 'valid signin',
+                token: doc._id,
+                timers: timers,
+                user: email,
+                groups: groups
+            })
           })
         })
-
-
       })
     })
   })
@@ -134,13 +137,57 @@ module.exports = (app) => {
     })
   })
 
+  app.post('/group', (req, res, next) => {
+    const {
+      body
+    } = req;
 
+    const {
+      name,
+      timers,
+      token
+    } = body;
+
+    if (!name || timers.length == 0) {
+      res.send({
+        succes: false,
+        message: 'Error: Timer name and timers are required.'
+      })
+    } else {
+      UserSession.find({
+        _id: token,
+        isDeleted: false
+      }, (err, sessions) => {
+
+        const newGroup = new Group();
+
+        newGroup.name = name;
+        newGroup.timers = timers;
+        newGroup.user = sessions[0].userId
+        newGroup.save((err, group) => {
+          if (err) {
+            console.log(err);
+          } else {
+            Group.find({
+              user: sessions[0].userId
+            }, (err, timers) => {
+              res.send({
+                success: true,
+                message: 'Group added',
+                group: group
+              })
+            })
+
+          }
+        })
+      })
+    }
+  })
 
   app.post('/timer', (req, res, next) => {
     const {
       body
     } = req;
-    console.log(body);
 
     const {
       name,
@@ -206,6 +253,30 @@ module.exports = (app) => {
           success: true,
           message: 'Timer added',
           timers: timers
+        })
+      })
+    })
+  })
+
+  app.get('/group', (req, res, next) => {
+    const {
+      query
+    } = req;
+    const {
+      token
+    } = query;
+
+    UserSession.find({
+      _id: token,
+      isDeleted: false
+    }, (err, sessions) => {
+      Group.find({
+        user: sessions[0].userId
+      }, (err, groups) => {
+        res.send({
+          success: true,
+          message: 'Groups found',
+          groups: groups
         })
       })
     })
@@ -299,6 +370,57 @@ module.exports = (app) => {
     })
   })
 
+  app.delete('/group', function(req, res) {
+    const {
+      query
+    } = req;
+    const {
+      groupId,
+      token
+    } = query;
+
+    UserSession.find({
+      _id: token,
+      isDeleted: false
+    }, (err, sessions) => {
+
+      if (err) {
+        console.log(err);
+        return res.send({
+          success: false,
+          message: 'error: server error'
+        });
+      }
+
+      if (sessions.length < 1) {
+        return res.send({
+          success: false,
+          message: 'error: Invalid'
+        })
+      } else {
+        Group.deleteOne({
+          _id: groupId
+        }, function(err) {
+          if (err) {
+            console.log(err);
+          } else {
+            Group.find({
+              user: sessions[0].userId
+            }, (err, groups) => {
+              res.send({
+                success: true,
+                message: 'Group deleted',
+                groups: groups
+              })
+            })
+          }
+        })
+      }
+    })
+  })
+
+
+
   app.delete('/timer', function(req, res) {
     const {
       query
@@ -312,7 +434,6 @@ module.exports = (app) => {
       _id: token,
       isDeleted: false
     }, (err, sessions) => {
-      console.log(sessions);
 
       if (err) {
         console.log(err);

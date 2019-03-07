@@ -1,22 +1,27 @@
 import React, {Component} from 'react';
-import TimerList from './TimerList.js';
 
 class SaveGroup extends Component {
   constructor(props) {
     console.log(props);
     super(props);
     this.state = {
+      name: props.groupName
     }
-    this.saveGroup = this.saveGroup.bind(this)
+    this.onNameInputChange = this.onNameInputChange.bind(this);
   }
 
-  saveGroup() {
-    console.log('save shit');
+  onNameInputChange(event) {
+    this.setState({
+      name: event.target.value
+    })
   }
 
   render() {
     return (
-      <button onClick={() => {this.saveGroup()}}>Save Group</button>
+      <div>
+        <input value={this.state.name} onChange={this.onNameInputChange} placeholder="Name..."></input>
+        <button onClick={() => {this.props.saveGroup(this.state.name)}}>Save Group</button>
+      </div>
     );
   }
 }

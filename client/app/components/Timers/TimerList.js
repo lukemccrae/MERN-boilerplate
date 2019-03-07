@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import TimerQueue from './TimerQueue.js';
 import SaveGroup from './SaveGroup.js';
+import Groups from './Groups.js';
 import {
   getFromStorage,
   setInStorage
@@ -8,7 +9,6 @@ import {
 
 class TimerList extends Component {
   constructor(props) {
-    console.log(props);
     super(props);
     this.state = {
       timerName: 'New Timer',
@@ -23,6 +23,7 @@ class TimerList extends Component {
     this.queueTimer = this.queueTimer.bind(this)
     this.removeTimer = this.removeTimer.bind(this)
     this.deleteTimer = this.deleteTimer.bind(this)
+    this.clearQueue = this.clearQueue.bind(this)
   }
 
   onTextboxChangeTimerName(event) {
@@ -42,8 +43,6 @@ class TimerList extends Component {
       var queuedTimers = this.state.timerQueue;
       queuedTimers.push(timer);
       this.setState({timerQueue: queuedTimers});
-    } else {
-      console.log('timer already in queue');
     }
   }
 
@@ -51,6 +50,12 @@ class TimerList extends Component {
     let index = this.state.timerQueue[this.state.timerQueue.indexOf(timer)];
     this.setState({
       timerQueue: this.state.timerQueue.splice(1, index)
+    })
+  }
+
+  clearQueue() {
+    this.setState({
+      timerQueue: []
     })
   }
 
@@ -78,7 +83,6 @@ class TimerList extends Component {
             timerLength: 60
           })
         } else {
-          console.log('nope');
           this.setState({
             timerError: json.message,
             isLoading: false
@@ -88,9 +92,7 @@ class TimerList extends Component {
   }
 
   deleteTimer(timer) {
-    console.log(timer);
     var pos = this.state.timerQueue.map(function(e) { return e._id; }).indexOf(timer._id);
-    console.log(pos);
     if(pos == -1) {
       const token = JSON.parse(localStorage.the_main_app).token;
         const obj = getFromStorage('the_main_app');
@@ -102,7 +104,6 @@ class TimerList extends Component {
         })
         .then(res => res.json())
         .then(json => {
-          console.log(json);
           if(json.success) {
             this.props.getTimers(token)
           } else {
@@ -128,7 +129,9 @@ class TimerList extends Component {
           )
         })}
         <p>Queued Timers</p>
-        <TimerQueue removeTimer={this.removeTimer} timers={this.state.timerQueue}></TimerQueue>
+        <TimerQueue clearQueue={this.clearQueue} removeTimer={this.removeTimer} timerQueue={this.state.timerQueue}></TimerQueue>
+        <p>Groups</p>
+        <Groups groups={this.props.groups}></Groups>
 
       </div>
     );

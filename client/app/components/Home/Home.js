@@ -217,7 +217,8 @@ class Home extends Component {
             signInPassword: '',
             token: json.token,
             timers: json.timers,
-            username: json.user
+            username: json.user,
+            groups: json.groups
           })
         } else {
           this.setState({
@@ -268,7 +269,6 @@ class Home extends Component {
     .then(res => res.json())
     .then(json => {
       if(json.success) {
-        console.log('did it');
         this.setState({
           timers: json.timers
         })
@@ -392,15 +392,13 @@ class Home extends Component {
           <div>
             <div>
               <p>All Timers</p>
-              <TimerList getTimers={this.getTimers} timers={this.state.timers}></TimerList>
+              <TimerList getTimers={this.getTimers} groups={this.state.groups} timers={this.state.timers}></TimerList>
             </div>
             <div>
 
             </div>
           </div>
           <button onClick={this.startTimers}>Start</button>
-          <h3>this.state.countdown.timer.name</h3>
-          <h3>this.state.countdown.time.time</h3>
         </Row>
       </Container>
 

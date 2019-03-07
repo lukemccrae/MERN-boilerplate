@@ -2,7 +2,6 @@ import React, {Component} from 'react';
 
 class AddTimer extends Component {
   constructor(props) {
-    console.log(props);
     super(props);
     this.state = {
       timerName: 'New Timer',
