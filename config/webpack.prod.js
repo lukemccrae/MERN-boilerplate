@@ -7,7 +7,7 @@ const commonConfig = require('./webpack.common');
 module.exports = merge(commonConfig, {
   mode: 'production',
   optimization: {
-  minimize: false
+  minimize: true
 }
 
   output: {
