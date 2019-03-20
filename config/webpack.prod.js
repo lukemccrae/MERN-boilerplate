@@ -6,6 +6,9 @@ const commonConfig = require('./webpack.common');
 
 module.exports = merge(commonConfig, {
   mode: 'production',
+  optimization: {
+  minimize: false
+}
 
   output: {
     filename: 'js/[name].[hash].js',
