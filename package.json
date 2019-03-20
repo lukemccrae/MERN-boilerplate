@@ -55,6 +55,7 @@
     "whatwg-fetch": "^2.0.3"
   },
   "devDependencies": {
-    "react-testing-library": "^6.0.0"
+    "react-testing-library": "^6.0.0",
+    "uglifyjs-webpack-plugin": "^2.1.2"
   }
 }
